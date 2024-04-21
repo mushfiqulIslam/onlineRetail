@@ -1,0 +1,56 @@
+{"intents": [
+  {
+    "tag": "greeting",
+    "patterns": ["Hi there", "How are you", "Is anyone there?","Hey","Hola", "Hello", "Good day"],
+    "responses": ["Hello", "Good to see you again", "Hi there, how can I help?"],
+    "context": [""]
+  },
+  {
+    "tag": "goodbye",
+    "patterns": ["Bye", "See you later", "Goodbye", "Nice chatting to you, bye", "Till next time"],
+    "responses": ["See you!", "Have a nice day", "Bye! Come back again soon."],
+    "context": [""]
+  },
+  {
+    "tag": "thanks",
+    "patterns": ["Thanks", "Thank you", "That's helpful", "Awesome, thanks", "Thanks for helping me"],
+    "responses": ["My pleasure", "You're Welcome"],
+    "context": [""]
+  },
+  {
+    "tag": "product query",
+    "patterns": ["Suggest me a product"],
+    "responses": ["For that please provide me your customer id"],
+    "context": [""]
+  },
+  {
+    "tag": "product suggestion",
+    "patterns": ["Here is my customer id"],
+    "responses": ["Here is our suggestion"],
+    "context": ["product query"]
+  },
+  {
+    "tag": "query2",
+    "patterns": ["I do not have any customer id"],
+    "responses": ["In that case please share your country name"],
+    "context": ["product query"]
+  },
+  {
+    "tag": "query3",
+    "patterns": ["My country name is"],
+    "responses": ["Here is a list of products most of the people from your country bought"],
+    "context": ["query2"]
+  },
+  {
+    "tag": "orders status1",
+    "patterns": ["I want to learn about my orders status"],
+    "responses": ["Provide me the order id"],
+    "context": [""]
+  },
+  {
+    "tag": "orders status2",
+    "patterns": ["Here is my order id"],
+    "responses": ["Here is all the information related to the order"],
+    "context": ["orders status"]
+  }
+]}
