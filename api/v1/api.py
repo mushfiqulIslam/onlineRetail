@@ -44,16 +44,17 @@ async def chat(
     if tag == "product suggestion":
         _, customer_id = message.message.split(":")
         customer = await customer_controller.get_by_id(int(customer_id))
-        response = Response(msg, customer)
+        response = Response(message=msg, values=customer)
     elif tag == "query3":
         country = message.message.replace("My country name is", "")
         country = country.replace(" ", "")
         country = await country_controller.get_by_name(country)
-        response = Response(msg, country)
+        response = Response(message=msg, values=country)
     elif tag == "orders status2":
         _, invoice_id = message.message.split(":")
-        invoice = invoice_controller.get_by_id(int(invoice_id))
-        response = Response(msg, invoice)
-
+        invoice = await invoice_controller.get_by_id(int(invoice_id))
+        response = Response(message=msg, values=invoice)
+    else:
+        response = Response(message=msg, values=[])
 
     return response

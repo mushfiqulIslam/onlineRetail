@@ -67,7 +67,7 @@ class BaseRepository(Generic[ModelType]):
         return query
 
     async def _all(self, query: Select) -> list[ModelType]:
-        query = self.session.scalars(query)
+        query = await self.session.scalars(query)
         return query.all()
 
     async def _all_unique(self, query: Select) -> list[ModelType]:
