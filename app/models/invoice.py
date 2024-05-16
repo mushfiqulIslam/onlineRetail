@@ -13,7 +13,7 @@ class Invoice(Base, TimestampMixin):
     uuid = Column(UUID(as_uuid=True), default=uuid4, unique=True, nullable=False)
     stock_code = Column(Unicode(255), nullable=False)
     customer_id = Column(
-        BigInteger, ForeignKey("customers.id", ondelete="CASCADE"), nullable=False
+        BigInteger, ForeignKey("customers.id", ondelete="CASCADE"), nullable=True
     )
     product_id = Column(
         BigInteger, ForeignKey("products.id", ondelete="CASCADE"), nullable=False
