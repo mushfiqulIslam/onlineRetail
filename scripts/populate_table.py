@@ -1,7 +1,7 @@
 import pandas as pd
 from dotenv import load_dotenv
 
-from app.models import Country, Product, Customer, Invoice, CustomerProductTrend
+from app.models import Country, Product, Customer, Invoice, CustomerProductTrend, CountryProductTrend
 from core.database import get_session
 from core.factory import Factory
 
@@ -15,6 +15,7 @@ customers_dict = {}
 
 invoices = []
 customer_product_trends = []
+country_product_trends = []
 
 df = pd.read_excel('M:\\projects\OnlineRetailDataset\Online Retail Data Set.xlsx')
 df = df.drop_duplicates()
@@ -99,9 +100,11 @@ recency_df = df.groupby(['CustomerID', "Description"])['InvoiceDate'].max().rese
 recency_df['recency'] = (reference_date - recency_df['InvoiceDate']).dt.days
 frequency_df = df.groupby(['CustomerID', "Description"]).size().reset_index(name='frequency')
 monetary_df = df.groupby(['CustomerID', "Description"])['TotalSales'].sum().reset_index()
+quantity_df = df.groupby(['CustomerID', "Description"])['Quantity'].sum().reset_index()
 
 rfm_df = pd.merge(recency_df, frequency_df, on=['CustomerID', "Description"])
 rfm_df = pd.merge(rfm_df, monetary_df, on=['CustomerID', "Description"])
+rfm_df = pd.merge(rfm_df, quantity_df, on=['CustomerID', "Description"])
 for _, row in rfm_df.iterrows():
     if not (
             pd.isna(rfm_df["CustomerID"]) or pd.isnull(rfm_df["CustomerID"])
@@ -111,11 +114,34 @@ for _, row in rfm_df.iterrows():
             product_id=products_dict[row["Description"]],
             recency=float(row['recency']),
             frequency=float(row['frequency']),
+            quantity=float(row['Quantity']),
             total_purchase = float(row['TotalSales'])
         )
         customer_product_trends.append(customer_product_trend)
 
 session.bulk_save_objects(customer_product_trends)
+
+recency_df = df.groupby(['Country', "Description"])['InvoiceDate'].max().reset_index()
+recency_df['recency'] = (reference_date - recency_df['InvoiceDate']).dt.days
+frequency_df = df.groupby(['Country', "Description"]).size().reset_index(name='frequency')
+monetary_df = df.groupby(['Country', "Description"])['TotalSales'].sum().reset_index()
+quantity_df = df.groupby(['Country', "Description"])['Quantity'].sum().reset_index()
+
+rfm_df = pd.merge(recency_df, frequency_df, on=['Country', "Description"])
+rfm_df = pd.merge(rfm_df, monetary_df, on=['Country', "Description"])
+rfm_df = pd.merge(rfm_df, quantity_df, on=['Country', "Description"])
+for _, row in rfm_df.iterrows():
+    country_product_trend = CountryProductTrend(
+        country_id=countries_dict[row["Country"]],
+        product_id=products_dict[row["Description"]],
+        recency=float(row['recency']),
+        frequency=float(row['frequency']),
+        quantity=float(row['Quantity']),
+        total_purchase = float(row['TotalSales'])
+    )
+    country_product_trends.append(country_product_trend)
+
+session.bulk_save_objects(country_product_trends)
 
 session.commit()
 session.close()
