@@ -1,7 +1,7 @@
 import pandas as pd
 from dotenv import load_dotenv
 
-from app.models import Country, Product, Customer, Invoice
+from app.models import Country, Product, Customer, Invoice, CustomerProductTrend
 from core.database import get_session
 from core.factory import Factory
 
@@ -14,6 +14,7 @@ products_dict = {}
 customers_dict = {}
 
 invoices = []
+customer_product_trends = []
 
 df = pd.read_excel('M:\\projects\OnlineRetailDataset\Online Retail Data Set.xlsx')
 df = df.drop_duplicates()
@@ -93,6 +94,28 @@ for _, row in rfm_df.iterrows():
         customer.save()
 
 session.bulk_save_objects(invoices)
+
+recency_df = df.groupby(['CustomerID', "Description"])['InvoiceDate'].max().reset_index()
+recency_df['recency'] = (reference_date - recency_df['InvoiceDate']).dt.days
+frequency_df = df.groupby(['CustomerID', "Description"]).size().reset_index(name='frequency')
+monetary_df = df.groupby(['CustomerID', "Description"])['TotalSales'].sum().reset_index()
+
+rfm_df = pd.merge(recency_df, frequency_df, on=['CustomerID', "Description"])
+rfm_df = pd.merge(rfm_df, monetary_df, on=['CustomerID', "Description"])
+for _, row in rfm_df.iterrows():
+    if not (
+            pd.isna(rfm_df["CustomerID"]) or pd.isnull(rfm_df["CustomerID"])
+    ):
+        customer_product_trend = CustomerProductTrend(
+            customer_id=customers_dict[row["CustomerID"]],
+            product_id=products_dict[row["Description"]],
+            recency=float(row['recency']),
+            frequency=float(row['frequency']),
+            total_purchase = float(row['TotalSales'])
+        )
+        customer_product_trends.append(customer_product_trend)
+
+session.bulk_save_objects(customer_product_trends)
 
 session.commit()
 session.close()
