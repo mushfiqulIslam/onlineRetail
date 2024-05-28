@@ -1,6 +1,7 @@
 from app.models import Country
 from app.repositories import CountryRepository
 from core.controller import BaseController
+from core.database import Transactional, Propagation
 
 
 class CountryController(BaseController[Country]):
@@ -11,3 +12,9 @@ class CountryController(BaseController[Country]):
 
     async def get_by_name(self, name: str) -> list[Country]:
         return await self.country_repository.get_by_name(name)
+
+    @Transactional(propagation=Propagation.REQUIRED)
+    async def add(self, country: str) -> Country:
+        return await self.country_repository.create({
+                "country": country
+        })

@@ -1,44 +1,38 @@
-import pickle
+from dotenv import load_dotenv
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain.memory import ChatMessageHistory
+from langchain_openai import ChatOpenAI
 
-import nltk
-import numpy as np
-from keras.src.saving import load_model
-from nltk import WordNetLemmatizer
+load_dotenv()
 
 
-class ChatBot:
+system_prompt = """
+You are a customer service representative for a company selling products. We have product information, country information,
+customers purchase information. Your duty is to first identify customers query. If query is related to product suggestions,
+ you must ask customerId first, if not available then Country name. If customer wants to know about their order's status
+ ask them invoiceID, if not available CustomerID, for CustomerID we will send last orders information.  Here is a format of 
+ your reply:
+ProvidedCustomerIDorCountryorInvoiceID: {True if customer provided any of CustomerID, Country or InvoiceID else False}
+Purpose: {Order If customer wants orders information, Suggestion if customer wants product suggestion, ignore otherwise}
+CustomerID : {CustomerID or False}
+Country: {Country or False}
+InvoiceID: {InvoiceID or False}
+PositiveResponseMessage: {If customer provided CustomerID, Country or InvoiceID. Example: Here is our suggestions}
+NegativeResponseMessage: {If customer provided CustomerID, Country or InvoiceID. Example: Sorry! we don't have the 
+information you are looking for}
+NextMessage: {If customer did not provided any of CustomerID, Country or InvoiceID, put customer's reply message here}
+"""
 
-    def __init__(self):
-        self.lemmatizer = WordNetLemmatizer()
-        try:
-            self.words = pickle.load(open("core/chatbot/words.pkl", "rb"))
-            self.classes = pickle.load(open("core/chatbot/classes.pkl", "rb"))
-            self.model = load_model("core/chatbot/chatbot_model.h5")
-        except Exception:
-            print("Please train the model first then start this service")
+chat = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            "Answer customer's query based on using this format: {system_prompt}",
+        ),
+        MessagesPlaceholder(variable_name="messages")
+    ]
+)
 
-    def clean_up_sentence(self, sentence):
-        sentence_words = nltk.word_tokenize(sentence)
-        sentence_words = [self.lemmatizer.lemmatize(word) for word in sentence_words]
-        return sentence_words
-
-    def bag_of_words(self, sentence):
-        sentence_words = self.clean_up_sentence(sentence)
-        bag = [0] * len(self.words)
-        for w in sentence_words:
-            for i, word in enumerate(self.words):
-                if word == w:
-                    bag[i] = 1
-
-        return np.array(bag)
-
-    def predict_class(self, sentence):
-        bow = self.bag_of_words(sentence)
-        res = self.model.predict(np.array([bow]))[0]
-        results = [[i, r] for i, r in enumerate(res) if r > 0.25]
-
-        results.sort(key=lambda x: x[1], reverse=True)
-        return_list = []
-        for r in results:
-            return_list.append({'intent': self.classes[r[0]], 'probability': str(r[1])})
-        return return_list
+chain = prompt | chat
+demo_ephemeral_chat_history = ChatMessageHistory()
