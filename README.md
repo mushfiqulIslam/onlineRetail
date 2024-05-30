@@ -1,6 +1,5 @@
 # onlineRetail
-The notebook folder contains a notebook where I did Part 1: Machine Learning Model Implementation.
-Rest of the part is under Part 2: Chatbot Development.
+This a sales chatbot that helps customer to track their order, getting product suggestions based on data available on the database. 
 
 To build this project I used a layered architecture that includes a model layer, a repository layer, a controller layer,
 and an API layer. The schema of this project contains Country, Product, Customer, Invoice, Customer-Product Trend and
