@@ -6,11 +6,9 @@ and an API layer. The schema of this project contains Country, Product, Customer
 Country-Product Trend class with information related to how frequently a product bought, what is the latency between buying 
 more than one time and total amount of money spent for a product. This will help bot to find out what are the targeted products
  of a client. Country-Product Trend table will help to provide additional suggestions based on other citizens preferences.  
-The bot was build using Dense Neural Network and Natural Language Processing. Here, I have added an intents json file
-which contains tag, patterns, response and content of process message properly using NLP techniques. Based these predefined 
-message DNN model can find out which tag is applicable for this and using that bot searches additional details to the database.
-Database will be updated as soon as new invoice added because all the table has some value which is calculated according 
-to invoices. This calculations will be stored in the database to find out suggestions on the go.
+The bot basically works with the help of ChatGPT. using LangChain, I developed a prompt format which is used to give ChatGPT
+proper guidance on replying any query to the user. Based on pre-defined response our bot process the additional information
+required to reply a customer's query and send suitable message to the customer.
 
 
 ---
