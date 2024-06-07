@@ -1,4 +1,4 @@
-# onlineRetail
+# Sales Chatbot
 This a sales chatbot that helps customer to track their order, getting product suggestions based on data available on the database. 
 
 To build this project I used a layered architecture that includes a model layer, a repository layer, a controller layer,
